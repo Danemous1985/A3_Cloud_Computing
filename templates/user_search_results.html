@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='main.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+    <title>Search Results - DesignerHub</title>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Search Results</h1>
+            <nav>
+                <a href="{{ url_for('main', user_id=current_user_id) }}" class="nav-button">Back to Main Page</a>
+            </nav>
+        </header>
+
+        <main>
+            <section class="search-results">
+                <h2>Matching Users</h2>
+                {% if users %}
+                    <ul class="search-results-list">
+                        {% for user in users %}
+                            <li class="search-result-item">
+                                <strong>{{ user['first_name'] }} {{ user['last_name'] }}</strong> ({{ user['email'] }})
+                                <form method="post" action="{{ url_for('subscribe_user', subscriber_id=current_user_id, subscribed_to_id=user['UserID']) }}">
+                                    <input type="submit" value="Subscribe" class="sidebar-button">
+                                </form>
+                            </li>
+                        {% endfor %}
+                    </ul>
+                {% else %}
+                    <p>No users found.</p>
+                {% endif %}
+            </section>
+        </main>
+    </div>
+</body>
+</html>

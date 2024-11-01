@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='main.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+    <title>Main Page - DesignerHub</title>
+</head>
+<body>
+    <div class="container">
+        <aside class="sidebar">
+            <h3>Find Users</h3>
+            <form method="post" action="{{ url_for('search_users') }}">
+                <input type="text" name="search_query" placeholder="Enter user name or email">
+                <input type="submit" value="Search" class="sidebar-button">
+            </form>
+
+            <h3>Subscribed Users</h3>
+            <ul class="subscribed-users">
+                {% for subscription in subscriptions %}
+                    <li>
+                        <a href="{{ url_for('view_user_posts', user_id=subscription['SubscribedToID']) }}" class="sidebar-user-link">{{ subscription['first_name'] }} {{ subscription['last_name'] }}</a>
+                    </li>
+                {% endfor %}
+            </ul>
+        </aside>
+
+        <div class="main-content">
+            <header>
+                <h1>Welcome, {{ user['first_name'] }} {{ user['last_name'] }}!</h1>
+                <nav>
+                    <a href="#" class="nav-button">Manage Your Portfolio</a>
+                    <a href="{{ url_for('main', user_id=user['UserID']) }}" class="nav-button">Create a New Post</a>
+                    <a href="#" class="nav-button">View Client Messages</a>
+                    <a href="{{ url_for('login') }}" class="nav-button logout-button">Logout</a>
+                </nav>
+            </header>
+
+            <div class="portfolio-and-post">
+                <section class="portfolio">
+                    <h2>Your Portfolio</h2>
+                    <div class="portfolio-container">
+                        <div class="portfolio-item">
+                            <h3>Project 1</h3>
+                            <p>Description of Project 1</p>
+                        </div>
+                        <div class="portfolio-item">
+                            <h3>Project 2</h3>
+                            <p>Description of Project 2</p>
+                        </div>
+                    </div>
+                </section>
+
+                <section class="new-post">
+                    <h2>Create a New Post</h2>
+                    <form method="post" enctype="multipart/form-data">
+                        <textarea name="content" rows="4" placeholder="Write something..." style="resize: none;"></textarea><br>
+                        <input type="file" name="image" class="file-input"><br>
+                        <input type="submit" value="Post" class="post-button">
+                    </form>
+                </section>
+            </div>
+
+            <section class="posts">
+                <h2>Your Posts</h2>
+                {% if posts %}
+                    <div class="posts-container">
+                        {% for post in posts %}
+                            <div class="post">
+                                <strong>{{ post['timestamp'] }}</strong>
+                                <p>{{ post['content'] }}</p>
+                                {% if post['image_url'] %}
+                                    <img src="{{ post['image_url'] }}" alt="Post Image">
+                                {% endif %}
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <p>No posts yet.</p>
+                {% endif %}
+            </section>
+        </div>
+    </div>
+</body>
+</html>
