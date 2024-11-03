@@ -28,39 +28,43 @@
 
         <div class="main-content">
             <header>
-                <h1>Welcome, {{ user['first_name'] }} {{ user['last_name'] }}!</h1>
+                <h1>Welcome to DesignerHub, {{ user['first_name'] }} {{ user['last_name'] }}!</h1>
+                <h4>Below is your Portfolio. Scroll down to create a new post for subscribers, or manage your portfolio by clicking Manage Portfolio above</h4>
                 <nav>
-                    <a href="#" class="nav-button">Manage Your Portfolio</a>
+                    <a href="{{ url_for('manage_portfolio', user_id=user['UserID']) }}" class="nav-button">Manage Portfolio</a>
                     <a href="{{ url_for('main', user_id=user['UserID']) }}" class="nav-button">Create a New Post</a>
                     <a href="#" class="nav-button">View Client Messages</a>
                     <a href="{{ url_for('login') }}" class="nav-button logout-button">Logout</a>
                 </nav>
             </header>
 
-            <div class="portfolio-and-post">
-                <section class="portfolio">
-                    <h2>Your Portfolio</h2>
-                    <div class="portfolio-container">
-                        <div class="portfolio-item">
-                            <h3>Project 1</h3>
-                            <p>Description of Project 1</p>
-                        </div>
-                        <div class="portfolio-item">
-                            <h3>Project 2</h3>
-                            <p>Description of Project 2</p>
-                        </div>
-                    </div>
-                </section>
+            <section class="portfolio">
+                <h2>Your Portfolio</h2>
+                <div class="portfolio-container">
+                    {% if portfolio_items %}
+                        {% for item in portfolio_items %}
+                            <div class="portfolio-item">
+                                <h3>{{ item.Title }}</h3>
+                                <p>{{ item.Description }}</p>
+                                {% if item.image_url %}
+                                    <img src="{{ item.image_url }}" alt="Portfolio Image" class="portfolio-image">
+                                {% endif %}
+                            </div>
+                        {% endfor %}
+                    {% else %}
+                        <p>No portfolio items yet.</p>
+                    {% endif %}
+                </div>
+            </section>
 
-                <section class="new-post">
-                    <h2>Create a New Post</h2>
-                    <form method="post" enctype="multipart/form-data">
-                        <textarea name="content" rows="4" placeholder="Write something..." style="resize: none;"></textarea><br>
-                        <input type="file" name="image" class="file-input"><br>
-                        <input type="submit" value="Post" class="post-button">
-                    </form>
-                </section>
-            </div>
+            <section class="new-post">
+                <h2>Create a New Post</h2>
+                <form method="post" enctype="multipart/form-data">
+                    <textarea name="content" rows="4" placeholder="Write something..." style="resize: none;"></textarea><br>
+                    <input type="file" name="image" class="file-input"><br>
+                    <input type="submit" value="Post" class="post-button">
+                </form>
+            </section>
 
             <section class="posts">
                 <h2>Your Posts</h2>

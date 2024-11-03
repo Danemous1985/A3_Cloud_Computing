@@ -15,8 +15,10 @@ dynamodb = boto3.resource('dynamodb', region_name='us-east-1')
 users_table = dynamodb.Table('Users')
 posts_table = dynamodb.Table('Posts')
 subscriptions_table = dynamodb.Table('Subscriptions')
+portfolios_table = dynamodb.Table('Portfolios')
 
 s3 = boto3.client('s3')
+bucket_name = 'designerhubmedia'
 
 # Route for home page (login page)
 @app.route('/', methods=['GET', 'POST'])
@@ -71,23 +73,22 @@ def register():
 # Route for main page after login
 @app.route('/main/<user_id>', methods=['GET', 'POST'])
 def main(user_id):
-    if 'user_id' in session:
-        print(f"Session User ID: {session['user_id']}")
-    else:
-        print("No user ID found in session.")
+    if 'user_id' not in session or session['user_id'] != user_id:
+        return redirect(url_for('login'))
 
+    # Get user data
     response = users_table.get_item(Key={'UserID': user_id})
     user = response.get('Item')
     if not user:
         return jsonify({'error': 'User not found.'}), 404
 
     if request.method == 'POST':
-        # Creating a new post here
+        # Creating a new post
         content = request.form['content']
         post_id = str(uuid.uuid4())
         timestamp = datetime.utcnow().isoformat()
 
-        # Store post in dynamoDB
+        # Store post in DynamoDB
         posts_table.put_item(
             Item={
                 'PostID': post_id,
@@ -97,11 +98,9 @@ def main(user_id):
             }
         )
 
-        # Store post image in S3 BUCKET
+        # Store post image in S3
         if 'image' in request.files:
             image = request.files['image']
-            bucket_name = 'designerhubmedia'
-            # Store in the 'posts' folder
             s3_key = f'posts/{post_id}.jpg'
             s3.upload_fileobj(image, bucket_name, s3_key)
 
@@ -109,14 +108,28 @@ def main(user_id):
     posts_response = posts_table.scan(FilterExpression=Attr('UserID').eq(user_id))
     posts = posts_response.get('Items')
 
-    # Generate presigned URLs for each post image. This was problem and had to use presigned URL's to function
+    # Generate presigned URLs for each post image
     for post in posts:
         if 'PostID' in post:
             s3_key = f'posts/{post["PostID"]}.jpg'
             post['image_url'] = s3.generate_presigned_url(
                 'get_object',
-                Params={'Bucket': 'designerhubmedia', 'Key': s3_key},
-                  # URL valid for 1 hour but regenerates.
+                Params={'Bucket': bucket_name, 'Key': s3_key},
+                ExpiresIn=3600
+            )
+
+    # Get user portfolio items
+    portfolio_response = portfolios_table.query(
+        KeyConditionExpression=Key('UserID').eq(user_id)
+    )
+    portfolio_items = portfolio_response.get('Items', [])
+
+    # Create presigned URLs for each portfolio image
+    for item in portfolio_items:
+        if 'ImageKey' in item:
+            item['image_url'] = s3.generate_presigned_url(
+                'get_object',
+                Params={'Bucket': bucket_name, 'Key': item['ImageKey']},
                 ExpiresIn=3600
             )
 
@@ -126,14 +139,16 @@ def main(user_id):
     )
     subscriptions = subscriptions_response.get('Items', [])
 
-    # Add user details to each subscription for display. Very difficult this section.
+    # Add user details to each subscription for display
     for subscription in subscriptions:
         subscribed_user = users_table.get_item(Key={'UserID': subscription['SubscribedToID']}).get('Item')
         if subscribed_user:
             subscription['first_name'] = subscribed_user.get('first_name', 'Unknown')
             subscription['last_name'] = subscribed_user.get('last_name', 'Unknown')
 
-    return render_template('main.html', user=user, posts=posts, subscriptions=subscriptions)
+    return render_template('main.html', user=user, posts=posts, portfolio_items=portfolio_items, subscriptions=subscriptions)
+
+
 
 # Route to subscribe to a user
 @app.route('/subscribe_user/<subscriber_id>/<subscribed_to_id>', methods=['POST'])
@@ -217,6 +232,83 @@ def view_user_posts(user_id):
     except Exception as e:
         # Return error for better debugging. Helped with server problem I was having
         return jsonify({'error': 'Internal Server Error', 'details': str(e)}), 500
+
+@app.route('/manage_portfolio/<user_id>', methods=['GET', 'POST'])
+def manage_portfolio(user_id):
+    if 'user_id' not in session or session['user_id'] != user_id:
+        return redirect(url_for('login'))
+
+    if request.method == 'POST':
+        # For adding new portfolio item
+        title = request.form['title']
+        description = request.form['description']
+
+        # For image upload to S3
+        if 'image' in request.files:
+            image = request.files['image']
+            portfolio_id = str(uuid.uuid4())
+            s3_key = f'portfolios/{user_id}/{portfolio_id}.jpg'
+
+            # Upload image to S3
+            s3.upload_fileobj(image, bucket_name, s3_key)
+
+            # Add item to DynamoDB
+            portfolios_table.put_item(
+                Item={
+                    'UserID': user_id,
+                    'PortfolioID': portfolio_id,
+                    'Title': title,
+                    'Description': description,
+                    'ImageKey': s3_key,
+                    'Timestamp': datetime.utcnow().isoformat()
+                }
+            )
+        return redirect(url_for('manage_portfolio', user_id=user_id))
+
+    # Retrieve portfolio items for user
+    response = portfolios_table.query(
+        KeyConditionExpression=Key('UserID').eq(user_id)
+    )
+    portfolio_items = response.get('Items', [])
+
+    # Create presigned URLs for each portfolio image
+    for item in portfolio_items:
+        if 'ImageKey' in item:
+            item['image_url'] = s3.generate_presigned_url(
+                'get_object',
+                Params={'Bucket': bucket_name, 'Key': item['ImageKey']},
+                ExpiresIn=3600
+            )
+
+    return render_template('manage_portfolio.html', portfolio_items=portfolio_items, user_id=user_id)
+
+@app.route('/delete_portfolio/<user_id>/<portfolio_id>', methods=['POST'])
+def delete_portfolio(user_id, portfolio_id):
+    if 'user_id' not in session or session['user_id'] != user_id:
+        return redirect(url_for('login'))
+
+    # Get the portfolio item from DynamoDB
+    response = portfolios_table.get_item(
+        Key={
+            'UserID': user_id,
+            'PortfolioID': portfolio_id
+        }
+    )
+    item = response.get('Item')
+
+    if item:
+        # Delete image from S3
+        s3_key = item['ImageKey']
+        s3.delete_object(Bucket=bucket_name, Key=s3_key)
+
+        # Delete item from dynamoDB
+        portfolios_table.delete_item(
+            Key={
+                'UserID': user_id,
+                'PortfolioID': portfolio_id
+            }
+        )
+    return redirect(url_for('manage_portfolio', user_id=user_id))
 
 # Error handler for resource not found
 @app.errorhandler(404)

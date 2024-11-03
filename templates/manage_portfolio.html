@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='manage_portfolio.css') }}">
+    <title>Manage Portfolio - DesignerHub</title>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h2>Manage Your Portfolio</h2>
+            <a href="{{ url_for('main', user_id=user_id) }}" class="back-button">Back to Main Page</a>
+        </header>
+
+        <section class="add-item">
+            <h3>Add New Portfolio Item</h3>
+            <form method="post" enctype="multipart/form-data">
+                <input type="text" name="title" placeholder="Project Title" required><br>
+                <textarea name="description" rows="4" placeholder="Project Description" required></textarea><br>
+                <input type="file" name="image" required><br>
+                <input type="submit" value="Add to Portfolio" class="add-button">
+            </form>
+        </section>
+
+        <section class="portfolio-items">
+            <h3>Your Portfolio Items</h3>
+            <div class="portfolio-container">
+                {% for item in portfolio_items %}
+                <div class="portfolio-item">
+                    <h4>{{ item.Title }}</h4>
+                    <p>{{ item.Description }}</p>
+                    {% if item.image_url %}
+                    <img src="{{ item.image_url }}" alt="Portfolio Image" class="portfolio-image">
+                    {% endif %}
+                    <form method="post" action="{{ url_for('delete_portfolio', user_id=user_id, portfolio_id=item.PortfolioID) }}">
+                        <button type="submit" class="delete-button">Delete</button>
+                    </form>
+                </div>
+                {% endfor %}
+            </div>
+        </section>
+    </div>
+</body>
+</html>
