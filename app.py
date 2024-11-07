@@ -16,6 +16,7 @@ users_table = dynamodb.Table('Users')
 posts_table = dynamodb.Table('Posts')
 subscriptions_table = dynamodb.Table('Subscriptions')
 portfolios_table = dynamodb.Table('Portfolios')
+messages_table = dynamodb.Table('Messages')
 
 s3 = boto3.client('s3')
 bucket_name = 'designerhubmedia'
@@ -309,6 +310,50 @@ def delete_portfolio(user_id, portfolio_id):
             }
         )
     return redirect(url_for('manage_portfolio', user_id=user_id))
+
+
+# Route to send message to another user
+@app.route('/send_message/<receiver_id>', methods=['POST'])
+def send_message(receiver_id):
+    if 'user_id' not in session:
+        return redirect(url_for('login'))
+
+    sender_id = session['user_id']
+    message_content = request.form['message_content']
+    timestamp = datetime.utcnow().isoformat()
+
+    # Store the message in dynamoDB
+    message_id = str(uuid.uuid4())
+    messages_table.put_item(
+        Item={
+            'MessageID': message_id,
+            'SenderID': sender_id,
+            'ReceiverID': receiver_id,
+            'Content': message_content,
+            'Timestamp': timestamp
+        }
+    )
+
+    # Redirect back to the user's posts page
+    return redirect(url_for('main', user_id=session['user_id']))
+
+# Route for viewing received messages
+@app.route('/view_messages/<user_id>', methods=['GET'])
+def view_messages(user_id):
+    if 'user_id' not in session or session['user_id'] != user_id:
+        return redirect(url_for('login'))
+
+    # Retrieve messages for logged in user
+    response = messages_table.scan(FilterExpression=Attr('ReceiverID').eq(user_id))
+    messages = response.get('Items', [])
+
+    # Get sender information for each message
+    for message in messages:
+        sender = users_table.get_item(Key={'UserID': message['SenderID']}).get('Item')
+        if sender:
+            message['sender_name'] = f"{sender.get('first_name', 'Unknown')} {sender.get('last_name', 'Unknown')}"
+
+    return render_template('view_messages.html', messages=messages, user_id=user_id)
 
 # Error handler for resource not found
 @app.errorhandler(404)

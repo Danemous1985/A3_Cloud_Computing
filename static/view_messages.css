@@ -1,0 +1,129 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Poppins', sans-serif;
+}
+
+body {
+    background-color: #1e1e1e;
+    color: #f8f8f8;
+}
+
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 30px;
+    padding: 20px;
+    background-color: #2c2c2c;
+    border-radius: 8px;
+}
+
+header h1 {
+    color: #ff5722;
+    font-size: 2em;
+}
+
+.nav-button {
+    background-color: #e53935;
+    color: #ffffff;
+    padding: 10px 20px;
+    border-radius: 5px;
+    text-decoration: none;
+    transition: background-color 0.3s;
+    font-weight: bold;
+}
+
+.nav-button:hover {
+    background-color: #ff7043;
+}
+
+.messages-section {
+    padding: 20px;
+    background-color: #2c2c2c;
+    border-radius: 8px;
+}
+
+.messages-section h2 {
+    color: #ff5722;
+    margin-bottom: 20px;
+    font-size: 1.5em;
+}
+
+.messages-container {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.message-card {
+    background-color: #3c3c3c;
+    border-radius: 8px;
+    padding: 20px;
+    transition: transform 0.2s;
+}
+
+.message-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+}
+
+.message-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid #444;
+}
+
+.sender-name {
+    color: #ff5722;
+    font-weight: 600;
+    font-size: 1.1em;
+}
+
+.message-date {
+    color: #888;
+    font-size: 0.9em;
+}
+
+.message-content {
+    line-height: 1.6;
+    color: #f8f8f8;
+    font-size: 1em;
+}
+
+.no-messages {
+    text-align: center;
+    color: #888;
+    font-style: italic;
+    padding: 40px;
+    background-color: #3c3c3c;
+    border-radius: 8px;
+}
+
+@media (max-width: 768px) {
+    .container {
+        padding: 10px;
+    }
+
+    header {
+        flex-direction: column;
+        gap: 15px;
+        text-align: center;
+    }
+
+    .message-header {
+        flex-direction: column;
+        gap: 5px;
+        align-items: flex-start;
+    }
+}

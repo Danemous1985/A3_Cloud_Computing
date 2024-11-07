@@ -5,20 +5,29 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='main.css') }}">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
-    <title>{{ user['first_name'] }}'s Posts - DesignerHub</title>
+    <title>User Posts - DesignerHub</title>
 </head>
 <body>
     <div class="container">
-        <header>
-            <h1>{{ user['first_name'] }} {{ user['last_name'] }}'s Posts</h1>
-            <nav>
-                <a href="{{ url_for('main', user_id=session['user_id']) }}" class="nav-button">Back to Main Page</a>
-            </nav>
-        </header>
+        <div class="main-content">
+            <header>
+                <h1>{{ user['first_name'] }} {{ user['last_name'] }}'s Posts</h1>
+                <nav>
+                    <a href="{{ url_for('main', user_id=session['user_id']) }}" class="nav-button">Back to Main</a>
+                </nav>
+            </header>
 
-        <main>
+            <!-- Message Form Section -->
+            <section class="send-message">
+                <h2>Send Message to {{ user['first_name'] }}</h2>
+                <form method="post" action="{{ url_for('send_message', receiver_id=user['UserID']) }}">
+                    <textarea name="message_content" rows="4" placeholder="Write your message..." required></textarea>
+                    <input type="submit" value="Send Message" class="button">
+                </form>
+            </section>
+
             <section class="posts">
-                <h2>Posts by {{ user['first_name'] }}</h2>
+                <h2>Posts</h2>
                 {% if posts %}
                     <div class="posts-container">
                         {% for post in posts %}
@@ -32,10 +41,10 @@
                         {% endfor %}
                     </div>
                 {% else %}
-                    <p>No posts found for this user.</p>
+                    <p>No posts yet.</p>
                 {% endif %}
             </section>
-        </main>
+        </div>
     </div>
 </body>
 </html>

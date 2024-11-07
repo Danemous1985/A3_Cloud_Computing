@@ -32,8 +32,7 @@
                 <h4>Below is your Portfolio. Scroll down to create a new post for subscribers, or manage your portfolio by clicking Manage Portfolio above</h4>
                 <nav>
                     <a href="{{ url_for('manage_portfolio', user_id=user['UserID']) }}" class="nav-button">Manage Portfolio</a>
-                    <a href="{{ url_for('main', user_id=user['UserID']) }}" class="nav-button">Create a New Post</a>
-                    <a href="#" class="nav-button">View Client Messages</a>
+                    <a href="{{ url_for('view_messages', user_id=user['UserID']) }}" class="nav-button">View Client Messages</a>
                     <a href="{{ url_for('login') }}" class="nav-button logout-button">Logout</a>
                 </nav>
             </header>

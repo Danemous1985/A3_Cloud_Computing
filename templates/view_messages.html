@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='view_messages.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+    <title>Messages - DesignerHub</title>
+</head>
+<body>
+    <div class="container">
+        <div class="main-content">
+            <header>
+                <h1>Your Messages</h1>
+                <nav>
+                    <a href="{{ url_for('main', user_id=user_id) }}" class="nav-button">Back to Main</a>
+                </nav>
+            </header>
+
+            <section class="messages-section">
+                <h2>Client Messages</h2>
+                {% if messages %}
+                    <div class="messages-container">
+                        {% for message in messages %}
+                            <div class="message-card">
+                                <div class="message-header">
+                                    <span class="sender-name">From: {{ message['sender_name'] }}</span>
+                                    <span class="message-date">{{ message['Timestamp'] }}</span>
+                                </div>
+                                <div class="message-content">
+                                    {{ message['Content'] }}
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <p class="no-messages">No messages yet.</p>
+                {% endif %}
+            </section>
+        </div>
+    </div>
+</body>
+</html>
