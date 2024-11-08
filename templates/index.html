@@ -4,17 +4,27 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='login.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
     <title>Login - DesignerHub</title>
 </head>
 <body>
-    <h2>Login to DesignerHub</h2>
-    <form action="/" method="POST">
-        <label for="email">Email:</label><br>
-        <input type="email" id="email" name="email" required><br>
-        <label for="password">Password:</label><br>
-        <input type="password" id="password" name="password" required><br><br>
-        <input type="submit" value="Login">
-    </form>
-    <p>Don't have an account? <a href="{{ url_for('register') }}">Register here</a></p>
+    <div class="login-container">
+        <div class="login-box">
+            <img src="{{ url_for('static', filename='images/dhlogo.png') }}" alt="DesignerHub Logo" class="login-logo">
+            <h2>Login to DesignerHub</h2>
+            <form action="/" method="POST">
+                <div class="form-group">
+                    <label for="email">Email</label>
+                    <input type="email" id="email" name="email" required>
+                </div>
+                <div class="form-group">
+                    <label for="password">Password</label>
+                    <input type="password" id="password" name="password" required>
+                </div>
+                <input type="submit" value="Login" class="login-button">
+            </form>
+            <p class="register-link">Don't have an account? <a href="{{ url_for('register') }}">Register here</a></p>
+        </div>
+    </div>
 </body>
 </html>

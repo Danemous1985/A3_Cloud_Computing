@@ -25,7 +25,7 @@ The repository contains the following components:
   
 ## Preview
 
-![DesignerHub Preview](https://i.imgur.com/qFE0oHY.png)
+![DesignerHub Preview](https://i.imgur.com/6MQsTIM.jpeg) 
 
 The above image is a preview of the application.
 

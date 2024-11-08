@@ -11,25 +11,42 @@
     <div class="container">
         <div class="main-content">
             <header>
-                <h1>Your Messages</h1>
+                <div class="header-content">
+                    <img src="{{ url_for('static', filename='images/dhlogo.png') }}" alt="DesignerHub Logo" class="site-logo">
+                    <h1>Your Messages</h1>
+                </div>
                 <nav>
                     <a href="{{ url_for('main', user_id=user_id) }}" class="nav-button">Back to Main</a>
                 </nav>
             </header>
-
             <section class="messages-section">
-                <h2>Client Messages</h2>
+                <h2>Conversations</h2>
                 {% if messages %}
                     <div class="messages-container">
                         {% for message in messages %}
-                            <div class="message-card">
+                            <div class="message-card {% if message['is_sent'] %}message-sent{% else %}message-received{% endif %}">
                                 <div class="message-header">
-                                    <span class="sender-name">From: {{ message['sender_name'] }}</span>
+                                    {% if message['is_sent'] %}
+                                        <span class="message-direction">To: {{ message['receiver_name'] }}</span>
+                                    {% else %}
+                                        <span class="message-direction">From: {{ message['sender_name'] }}</span>
+                                    {% endif %}
                                     <span class="message-date">{{ message['Timestamp'] }}</span>
                                 </div>
                                 <div class="message-content">
                                     {{ message['Content'] }}
                                 </div>
+                                {% if not message['is_sent'] %}
+                                    <div class="message-actions">
+                                        <button onclick="toggleReplyForm('{{ message['SenderID'] }}')" class="reply-button">Reply</button>
+                                    </div>
+                                    <div id="replyForm-{{ message['SenderID'] }}" class="reply-form" style="display: none;">
+                                        <form action="{{ url_for('send_message', receiver_id=message['SenderID']) }}" method="POST">
+                                            <textarea name="message_content" placeholder="Write your reply..." required></textarea>
+                                            <button type="submit" class="send-reply-button">Send Reply</button>
+                                        </form>
+                                    </div>
+                                {% endif %}
                             </div>
                         {% endfor %}
                     </div>
@@ -39,5 +56,15 @@
             </section>
         </div>
     </div>
+    <script>
+        function toggleReplyForm(senderId) {
+            var form = document.getElementById('replyForm-' + senderId);
+            if (form.style.display === 'none') {
+                form.style.display = 'block';
+            } else {
+                form.style.display = 'none';
+            }
+        }
+    </script>
 </body>
 </html>

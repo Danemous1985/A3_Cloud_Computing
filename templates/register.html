@@ -4,21 +4,35 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='register.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
     <title>Register - DesignerHub</title>
 </head>
 <body>
-    <h2>Register for DesignerHub</h2>
-    <form action="/register" method="POST">
-        <label for="first_name">First Name:</label><br>
-        <input type="text" id="first_name" name="first_name" required><br>
-        <label for="last_name">Last Name:</label><br>
-        <input type="text" id="last_name" name="last_name" required><br>
-        <label for="email">Email:</label><br>
-        <input type="email" id="email" name="email" required><br>
-        <label for="password">Password:</label><br>
-        <input type="password" id="password" name="password" required><br><br>
-        <input type="submit" value="Register">
-    </form>
-    <p>Already have an account? <a href="{{ url_for('login') }}">Login here</a></p>
+    <div class="register-container">
+        <div class="register-box">
+            <img src="{{ url_for('static', filename='images/dhlogo.png') }}" alt="DesignerHub Logo" class="register-logo">
+            <h2>Register for DesignerHub</h2>
+            <form action="/register" method="POST">
+                <div class="form-group">
+                    <label for="first_name">First Name</label>
+                    <input type="text" id="first_name" name="first_name" required>
+                </div>
+                <div class="form-group">
+                    <label for="last_name">Last Name</label>
+                    <input type="text" id="last_name" name="last_name" required>
+                </div>
+                <div class="form-group">
+                    <label for="email">Email</label>
+                    <input type="email" id="email" name="email" required>
+                </div>
+                <div class="form-group">
+                    <label for="password">Password</label>
+                    <input type="password" id="password" name="password" required>
+                </div>
+                <input type="submit" value="Register" class="register-button">
+            </form>
+            <p class="login-link">Already have an account? <a href="{{ url_for('login') }}">Login here</a></p>
+        </div>
+    </div>
 </body>
 </html>

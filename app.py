@@ -21,7 +21,20 @@ messages_table = dynamodb.Table('Messages')
 s3 = boto3.client('s3')
 bucket_name = 'designerhubmedia'
 
-# Route for home page (login page)
+"""
+Created this for making timestamo more user friendly
+"""
+@app.template_filter('format_datetime')
+def format_datetime(timestamp):
+    try:
+        dt = datetime.fromisoformat(timestamp)
+        return dt.strftime("%b %d at %I:%M %p")
+    except:
+        return timestamp
+
+"""
+Login route
+"""
 @app.route('/', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
@@ -45,7 +58,9 @@ def login():
 
     return render_template('index.html')
 
-# Route for registration page
+"""
+Route for registration page
+"""
 @app.route('/register', methods=['GET', 'POST'])
 def register():
     if request.method == 'POST':
@@ -71,7 +86,9 @@ def register():
 
     return render_template('register.html')
 
-# Route for main page after login
+"""
+Route for main page after login
+"""
 @app.route('/main/<user_id>', methods=['GET', 'POST'])
 def main(user_id):
     if 'user_id' not in session or session['user_id'] != user_id:
@@ -108,6 +125,9 @@ def main(user_id):
     # Get user posts
     posts_response = posts_table.scan(FilterExpression=Attr('UserID').eq(user_id))
     posts = posts_response.get('Items')
+
+    # Sort posts by timestamp in descending order (newest first)
+    posts.sort(key=lambda x: x['timestamp'], reverse=True)
 
     # Generate presigned URLs for each post image
     for post in posts:
@@ -150,8 +170,9 @@ def main(user_id):
     return render_template('main.html', user=user, posts=posts, portfolio_items=portfolio_items, subscriptions=subscriptions)
 
 
-
-# Route to subscribe to a user
+"""
+Route to subscribe to a user
+"""
 @app.route('/subscribe_user/<subscriber_id>/<subscribed_to_id>', methods=['POST'])
 def subscribe_user(subscriber_id, subscribed_to_id):
     timestamp = datetime.utcnow().isoformat()
@@ -164,7 +185,9 @@ def subscribe_user(subscriber_id, subscribed_to_id):
     )
     return redirect(url_for('main', user_id=subscriber_id))
 
-# Route for retrieving users to subscribe to
+"""
+Route for retrieving users to subscribe to
+"""
 @app.route('/subscriptions/<user_id>', methods=['GET'])
 def get_subscriptions(user_id):
     response = subscriptions_table.query(
@@ -173,38 +196,43 @@ def get_subscriptions(user_id):
     subscriptions = response.get('Items', [])
     return jsonify(subscriptions), 200
 
-# Route for searching users
+"""
+Route for searching users
+"""
 @app.route('/search_users', methods=['POST'])
 def search_users():
     try:
         search_query = request.form.get('search_query', '').strip()
-
         if not search_query:
             return jsonify({'error': 'Search query cannot be empty'}), 400
 
-        # Search for users in synamoDB
-        response = users_table.scan(
-            FilterExpression=Attr('first_name').contains(search_query) | 
-                             Attr('last_name').contains(search_query) |
-                             Attr('email').contains(search_query)
-        )
+        search_terms = search_query.lower().split()
+        
+        response = users_table.scan()
+        all_users = response.get('Items', [])
+        
+        matched_users = []
+        for user in all_users:
+            user_full_name = f"{user.get('first_name', '')} {user.get('last_name', '')}".lower()
+            user_email = user.get('email', '').lower()
+            
+            if all(term in user_full_name or term in user_email for term in search_terms):
+                matched_users.append(user)
 
-        users = response.get('Items', [])
-
-        # Retrieve user_id from session. Need this for consistency across pages
         current_user_id = session.get('user_id')
-
         if not current_user_id:
             return jsonify({'error': 'User ID not found in session'}), 400
 
-        # Render the template, passing the current_user_id. Needed this for subscription page
-        return render_template('user_search_results.html', users=users, current_user_id=current_user_id)
+        return render_template('user_search_results.html', 
+                            users=matched_users, 
+                            current_user_id=current_user_id)
 
     except Exception as e:
-        # This for debugging because I was having alot of problems
         return jsonify({'error': 'Internal Server Error', 'details': str(e)}), 500
 
-# Route for viewing a subscribed user's posts
+"""
+Route for viewing a subscribed user's posts
+"""
 @app.route('/view_user_posts/<user_id>')
 def view_user_posts(user_id):
     try:
@@ -234,6 +262,9 @@ def view_user_posts(user_id):
         # Return error for better debugging. Helped with server problem I was having
         return jsonify({'error': 'Internal Server Error', 'details': str(e)}), 500
 
+"""
+Route for managing the portfoilo stuff
+"""
 @app.route('/manage_portfolio/<user_id>', methods=['GET', 'POST'])
 def manage_portfolio(user_id):
     if 'user_id' not in session or session['user_id'] != user_id:
@@ -283,6 +314,9 @@ def manage_portfolio(user_id):
 
     return render_template('manage_portfolio.html', portfolio_items=portfolio_items, user_id=user_id)
 
+"""
+This route for deleting portfolio items
+"""
 @app.route('/delete_portfolio/<user_id>/<portfolio_id>', methods=['POST'])
 def delete_portfolio(user_id, portfolio_id):
     if 'user_id' not in session or session['user_id'] != user_id:
@@ -312,7 +346,9 @@ def delete_portfolio(user_id, portfolio_id):
     return redirect(url_for('manage_portfolio', user_id=user_id))
 
 
-# Route to send message to another user
+"""
+Route to send message to another user
+"""
 @app.route('/send_message/<receiver_id>', methods=['POST'])
 def send_message(receiver_id):
     if 'user_id' not in session:
@@ -337,30 +373,46 @@ def send_message(receiver_id):
     # Redirect back to the user's posts page
     return redirect(url_for('main', user_id=session['user_id']))
 
-# Route for viewing received messages
+"""
+Route for viewing received messages
+"""
 @app.route('/view_messages/<user_id>', methods=['GET'])
 def view_messages(user_id):
     if 'user_id' not in session or session['user_id'] != user_id:
         return redirect(url_for('login'))
 
-    # Retrieve messages for logged in user
-    response = messages_table.scan(FilterExpression=Attr('ReceiverID').eq(user_id))
-    messages = response.get('Items', [])
+    # Get the received messages
+    received_response = messages_table.scan(FilterExpression=Attr('ReceiverID').eq(user_id))
+    received_messages = received_response.get('Items', [])
 
-    # Get sender information for each message
-    for message in messages:
+    # Get the sent messages
+    sent_response = messages_table.scan(FilterExpression=Attr('SenderID').eq(user_id))
+    sent_messages = sent_response.get('Items', [])
+
+    # Combine messages and add user info. Better and more user friendly, like a conversation or chat
+    all_messages = received_messages + sent_messages
+    
+    # Sort messages by timestamp
+    all_messages.sort(key=lambda x: x['Timestamp'], reverse=True)
+
+    # Get user info for each message that sent/received
+    for message in all_messages:
         sender = users_table.get_item(Key={'UserID': message['SenderID']}).get('Item')
+        receiver = users_table.get_item(Key={'UserID': message['ReceiverID']}).get('Item')
         if sender:
             message['sender_name'] = f"{sender.get('first_name', 'Unknown')} {sender.get('last_name', 'Unknown')}"
+        if receiver:
+            message['receiver_name'] = f"{receiver.get('first_name', 'Unknown')} {receiver.get('last_name', 'Unknown')}"
+        message['is_sent'] = message['SenderID'] == user_id
 
-    return render_template('view_messages.html', messages=messages, user_id=user_id)
+    return render_template('view_messages.html', messages=all_messages, user_id=user_id)
 
-# Error handler for resource not found
+# Error handler for resource not found. Helped when having problems.
 @app.errorhandler(404)
 def resource_not_found(e):
     return jsonify(error=str(e)), 404
 
-# Error handler for server errors
+# Error handler for server errors. Used this when i was having problems also.
 @app.errorhandler(500)
 def server_error(e):
     return jsonify(error=str(e)), 500

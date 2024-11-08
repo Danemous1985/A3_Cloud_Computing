@@ -3,37 +3,57 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='main.css') }}">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='user_search_results.css') }}">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
     <title>Search Results - DesignerHub</title>
 </head>
 <body>
     <div class="container">
         <header>
-            <h1>Search Results</h1>
+            <div class="header-content">
+                <img src="{{ url_for('static', filename='images/dhlogo.png') }}" alt="DesignerHub Logo" class="site-logo">
+                <h1>Search Results</h1>
+            </div>
             <nav>
-                <a href="{{ url_for('main', user_id=current_user_id) }}" class="nav-button">Back to Main Page</a>
+                <a href="{{ url_for('main', user_id=current_user_id) }}" class="nav-button">Back to Main</a>
             </nav>
         </header>
 
-        <main>
-            <section class="search-results">
-                <h2>Matching Users</h2>
-                {% if users %}
-                    <ul class="search-results-list">
-                        {% for user in users %}
-                            <li class="search-result-item">
-                                <strong>{{ user['first_name'] }} {{ user['last_name'] }}</strong> ({{ user['email'] }})
-                                <form method="post" action="{{ url_for('subscribe_user', subscriber_id=current_user_id, subscribed_to_id=user['UserID']) }}">
-                                    <input type="submit" value="Subscribe" class="sidebar-button">
-                                </form>
-                            </li>
-                        {% endfor %}
-                    </ul>
-                {% else %}
-                    <p>No users found.</p>
-                {% endif %}
-            </section>
+        <main class="search-results-container">
+            {% if users %}
+                <div class="results-count">
+                    Found {{ users|length }} user{% if users|length != 1 %}s{% endif %}
+                </div>
+                <div class="results-grid">
+                    {% for user in users %}
+                        <div class="user-card">
+                            <div class="user-info">
+                                <div class="user-avatar">
+                                    {{ user['first_name'][0] }}{{ user['last_name'][0] }}
+                                </div>
+                                <div class="user-details">
+                                    <h3>{{ user['first_name'] }} {{ user['last_name'] }}</h3>
+                                    <span class="user-email">{{ user['email'] }}</span>
+                                </div>
+                            </div>
+                            <div class="card-actions">
+                                <a href="{{ url_for('view_user_posts', user_id=user['UserID']) }}" class="view-button">View Profile</a>
+                                {% if user['UserID'] != current_user_id %}
+                                    <form method="post" action="{{ url_for('subscribe_user', subscriber_id=current_user_id, subscribed_to_id=user['UserID']) }}">
+                                        <button type="submit" class="subscribe-button">Subscribe</button>
+                                    </form>
+                                {% endif %}
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <div class="empty-state">
+                    <div class="empty-icon">🔍</div>
+                    <h2>No Users Found</h2>
+                    <p>Try adjusting your search terms</p>
+                </div>
+            {% endif %}
         </main>
     </div>
 </body>

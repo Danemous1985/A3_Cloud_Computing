@@ -4,42 +4,95 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='manage_portfolio.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
     <title>Manage Portfolio - DesignerHub</title>
 </head>
 <body>
     <div class="container">
         <header>
-            <h2>Manage Your Portfolio</h2>
-            <a href="{{ url_for('main', user_id=user_id) }}" class="back-button">Back to Main Page</a>
+            <div class="header-content">
+                <img src="{{ url_for('static', filename='images/dhlogo.png') }}" alt="DesignerHub Logo" class="site-logo">
+                <h1>Manage Your Portfolio</h1>
+            </div>
+            <nav>
+                <a href="{{ url_for('main', user_id=user_id) }}" class="nav-button">Back to Main</a>
+            </nav>
         </header>
 
-        <section class="add-item">
-            <h3>Add New Portfolio Item</h3>
-            <form method="post" enctype="multipart/form-data">
-                <input type="text" name="title" placeholder="Project Title" required><br>
-                <textarea name="description" rows="4" placeholder="Project Description" required></textarea><br>
-                <input type="file" name="image" required><br>
-                <input type="submit" value="Add to Portfolio" class="add-button">
-            </form>
-        </section>
+        <div class="content-grid">
+            <section class="add-item-section">
+                <div class="add-item-card">
+                    <h2>Add New Portfolio Item</h2>
+                    <form method="post" enctype="multipart/form-data" class="portfolio-form">
+                        <div class="form-group">
+                            <label for="title">Project Title</label>
+                            <input type="text" id="title" name="title" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="description">Project Description</label>
+                            <textarea id="description" name="description" rows="4" required></textarea>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="image" class="file-label">
+                                <span class="file-label-text">Choose Image</span>
+                                <input type="file" id="image" name="image" required class="file-input">
+                            </label>
+                            <div id="file-name" class="file-name">No file chosen</div>
+                        </div>
 
-        <section class="portfolio-items">
-            <h3>Your Portfolio Items</h3>
-            <div class="portfolio-container">
-                {% for item in portfolio_items %}
-                <div class="portfolio-item">
-                    <h4>{{ item.Title }}</h4>
-                    <p>{{ item.Description }}</p>
-                    {% if item.image_url %}
-                    <img src="{{ item.image_url }}" alt="Portfolio Image" class="portfolio-image">
-                    {% endif %}
-                    <form method="post" action="{{ url_for('delete_portfolio', user_id=user_id, portfolio_id=item.PortfolioID) }}">
-                        <button type="submit" class="delete-button">Delete</button>
+                        <button type="submit" class="submit-button">Add to Portfolio</button>
                     </form>
                 </div>
-                {% endfor %}
-            </div>
-        </section>
+            </section>
+
+            <section class="portfolio-section">
+                <h2>Your Portfolio Items</h2>
+                <div class="portfolio-grid">
+                    {% for item in portfolio_items %}
+                        <div class="portfolio-card">
+                            {% if item.image_url %}
+                                <div class="image-container" onclick="openImagePopup('{{ item.image_url }}')">
+                                    <img src="{{ item.image_url }}" alt="{{ item.Title }}" class="portfolio-image">
+                                    <div class="image-overlay">
+                                        <span class="view-text">Click to view</span>
+                                    </div>
+                                </div>
+                            {% endif %}
+                            <div class="card-content">
+                                <h3>{{ item.Title }}</h3>
+                                <p>{{ item.Description }}</p>
+                                <form method="post" action="{{ url_for('delete_portfolio', user_id=user_id, portfolio_id=item.PortfolioID) }}" class="delete-form">
+                                    <button type="submit" class="delete-button">Delete Item</button>
+                                </form>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            </section>
+        </div>
     </div>
+
+    <script>
+        // File input handling
+        document.getElementById('image').addEventListener('change', function(e) {
+            const fileName = e.target.files[0]?.name || 'No file chosen';
+            document.getElementById('file-name').textContent = fileName;
+        });
+
+        // Image popup
+        function openImagePopup(imageUrl) {
+            const popup = document.createElement('div');
+            popup.className = 'image-popup-overlay';
+            popup.innerHTML = `
+                <div class="image-popup-content">
+                    <img src="${imageUrl}" alt="Portfolio Image">
+                    <button class="close-popup" onclick="this.parentElement.parentElement.remove()">×</button>
+                </div>
+            `;
+            document.body.appendChild(popup);
+        }
+    </script>
 </body>
 </html>
