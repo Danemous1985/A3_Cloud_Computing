@@ -19,7 +19,7 @@ portfolios_table = dynamodb.Table('Portfolios')
 messages_table = dynamodb.Table('Messages')
 
 s3 = boto3.client('s3')
-bucket_name = 'designerhubmedia'
+bucket_name = 'designerhubmedia3'
 
 """
 Created this for making timestamo more user friendly
@@ -252,7 +252,7 @@ def view_user_posts(user_id):
                 s3_key = f'posts/{post["PostID"]}.jpg'
                 post['image_url'] = s3.generate_presigned_url(
                     'get_object',
-                    Params={'Bucket': 'designerhubmedia', 'Key': s3_key},
+                    Params={'Bucket': 'designerhubmedia3', 'Key': s3_key},
                     ExpiresIn=3600
                 )
 
