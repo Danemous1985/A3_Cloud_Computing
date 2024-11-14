@@ -2,3 +2,4 @@ Flask==3.0.3
 gunicorn
 boto3
 flask-cors
+requests==2.31.0

@@ -1,14 +1,46 @@
 from flask import Flask, request, render_template, redirect, url_for, jsonify, session
 import boto3
 import uuid
+import requests
+import logging
 from flask_cors import CORS
 from datetime import datetime
 from boto3.dynamodb.conditions import Attr, Key
 
 # Create Flask application instance
-app = Flask(__name__)
+app = Flask(__name__, 
+    static_url_path='',
+    static_folder='static')
 app.secret_key = 'supersecretkey'
-CORS(app)
+CORS(app, supports_credentials=True)
+
+app.config.update(
+    SESSION_COOKIE_SECURE=True,
+    SESSION_COOKIE_SAMESITE='None'
+)
+
+# Update CORS config in Flask
+CORS(app, 
+     support_credentials=True,
+     resources={
+         r"/*": {
+             "origins": "*",
+             "allow_headers": ["Content-Type", "Authorization"],
+             "expose_headers": ["Content-Range", "X-Content-Range"],
+             "methods": ["GET", "POST", "PUT", "DELETE", "OPTIONS"]
+         }
+     })
+
+logging.basicConfig(level=logging.DEBUG)
+
+@app.after_request
+def after_request(response):
+    response.headers.add('Access-Control-Allow-Origin', '*')
+    response.headers.add('Access-Control-Allow-Headers', 'Content-Type,Authorization')
+    response.headers.add('Access-Control-Allow-Methods', 'GET,POST,PUT,DELETE,OPTIONS')
+    response.headers.add('Access-Control-Allow-Credentials', 'true')
+    return response
+
 
 # Configure DynamoDB
 dynamodb = boto3.resource('dynamodb', region_name='us-east-1')
@@ -145,7 +177,7 @@ def main(user_id):
     )
     portfolio_items = portfolio_response.get('Items', [])
 
-    # Create presigned URLs for each portfolio image
+    # Create presigned URLs for each portfolio image. This worked better, had problems before.
     for item in portfolio_items:
         if 'ImageKey' in item:
             item['image_url'] = s3.generate_presigned_url(
@@ -406,6 +438,46 @@ def view_messages(user_id):
         message['is_sent'] = message['SenderID'] == user_id
 
     return render_template('view_messages.html', messages=all_messages, user_id=user_id)
+
+
+@app.route('/color_palette', methods=['GET', 'POST'])
+def color_palette():
+    if 'user_id' not in session:
+        return redirect(url_for('login'))
+    
+    # Get user info
+    user_response = users_table.get_item(Key={'UserID': session['user_id']})
+    user = user_response.get('Item')
+    
+    # Get subscriptions like in main route
+    subscriptions_response = subscriptions_table.query(
+        KeyConditionExpression=Key('SubscriberID').eq(session['user_id'])
+    )
+    subscriptions = subscriptions_response.get('Items', [])
+    
+    # Add user details to subscriptions
+    for subscription in subscriptions:
+        subscribed_user = users_table.get_item(Key={'UserID': subscription['SubscribedToID']}).get('Item')
+        if subscribed_user:
+            subscription['first_name'] = subscribed_user.get('first_name', 'Unknown')
+            subscription['last_name'] = subscribed_user.get('last_name', 'Unknown')
+    
+    palettes = []
+    if request.method == 'POST':
+        base_color = request.form.get('color', '#ff5722').replace('#', '')
+        modes = ['monochrome', 'analogic', 'complement', 'triad']
+        for mode in modes:
+            response = requests.get(f'https://www.thecolorapi.com/scheme?hex={base_color}&mode={mode}&count=5')
+            if response.status_code == 200:
+                data = response.json()
+                colors = [{'hex': c['hex']['value'], 'name': c['name']['value']} for c in data['colors']]
+                palettes.append({'mode': mode.title(), 'colors': colors})
+
+    return render_template('color_palette.html', 
+                         user=user,
+                         subscriptions=subscriptions,
+                         palettes=palettes)
+
 
 # Error handler for resource not found. Helped when having problems.
 @app.errorhandler(404)

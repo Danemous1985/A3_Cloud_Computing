@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='main.css') }}">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='color_palette.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+    <title>Color Palette - DesignerHub</title>
+</head>
+<body>
+    <div class="container">
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <img src="{{ url_for('static', filename='images/dhlogo.png') }}" alt="DesignerHub Logo" class="sidebar-logo">
+            </div>
+            
+            <div class="user-profile">
+                <h2>{{ user['first_name'] }} {{ user['last_name'] }}</h2>
+                <div class="profile-actions">
+                    <a href="{{ url_for('manage_portfolio', user_id=user['UserID']) }}" class="action-link">Manage Portfolio</a>
+                    <a href="{{ url_for('view_messages', user_id=user['UserID']) }}" class="action-link">Messages</a>
+                    <a href="{{ url_for('main', user_id=user['UserID']) }}" class="action-link">Back to Main</a>
+                </div>
+            </div>
+
+            <nav class="sidebar-nav">
+                <h3>Find Users</h3>
+                <form method="post" action="{{ url_for('search_users') }}" class="search-form">
+                    <input type="text" name="search_query" placeholder="Search users...">
+                    <button type="submit" class="search-button">Search</button>
+                </form>
+
+                <h3>Your Network</h3>
+                <ul class="subscribed-users">
+                    {% for subscription in subscriptions %}
+                        <li>
+                            <a href="{{ url_for('view_user_posts', user_id=subscription['SubscribedToID']) }}" class="user-link">
+                                {{ subscription['first_name'] }} {{ subscription['last_name'] }}
+                            </a>
+                        </li>
+                    {% endfor %}
+                </ul>
+            </nav>
+
+            <a href="{{ url_for('login') }}" class="logout-button">Logout</a>
+        </aside>
+
+        <main class="main-content">
+            <div class="content-grid">
+                <section class="color-section">
+                    <header class="section-header">
+                        <h2>Color Palette Generator</h2>
+                    </header>
+
+                    <div class="new-post-card">
+                        <form method="post" class="color-form">
+                            <div class="form-group">
+                                <label for="color">Select Base Color:</label>
+                                <input type="color" name="color" id="color" value="#ff5722">
+                            </div>
+                            <button type="submit" class="post-button">Generate Palettes</button>
+                        </form>
+                    </div>
+
+                    <div class="portfolio-grid">
+                        {% if palettes %}
+                            {% for palette in palettes %}
+                                <div class="portfolio-card">
+                                    <div class="card-content">
+                                        <h3>{{ palette.mode }}</h3>
+                                        <div class="color-strip">
+                                            {% for color in palette.colors %}
+                                                <div class="color-box" style="background-color: {{ color.hex }}">
+                                                    <input type="text" class="hex-input" value="{{ color.hex }}" readonly onclick="this.select();">
+                                                </div>
+                                            {% endfor %}
+                                        </div>
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        {% else %}
+                            <div class="empty-state">
+                                <p>Are you a designer? Select a Base colour above and have 4 colour schemes generated for your web page, Ui etc. Click to highlight the Hex code and right click to copy each colour you are happy with</p>
+                            </div>
+                        {% endif %}
+                    </div>
+                </section>
+            </div>
+        </main>
+    </div>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Select text when the input is clicked s user can copy hex code
+            const hexInputs = document.querySelectorAll('.hex-input');
+            hexInputs.forEach(input => {
+                input.addEventListener('click', function() {
+                    this.select();
+                });
+            });
+        });
+    </script>
+</body>
+</html>

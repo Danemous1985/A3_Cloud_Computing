@@ -17,7 +17,7 @@
                 </nav>
             </header>
 
-            <!-- Message Form Section -->
+            <!-- Message form -->
             <section class="send-message">
                 <h2>Send Message to {{ user['first_name'] }}</h2>
                 <form method="post" action="{{ url_for('send_message', receiver_id=user['UserID']) }}">
