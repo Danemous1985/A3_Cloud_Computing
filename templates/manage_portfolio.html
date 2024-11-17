@@ -9,90 +9,132 @@
 </head>
 <body>
     <div class="container">
-        <header>
-            <div class="header-content">
-                <img src="{{ url_for('static', filename='images/dhlogo.png') }}" alt="DesignerHub Logo" class="site-logo">
-                <h1>Manage Your Portfolio</h1>
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <img src="{{ url_for('static', filename='images/dhlogo.png') }}" alt="DesignerHub Logo" class="sidebar-logo">
             </div>
-            <nav>
-                <a href="{{ url_for('main', user_id=user_id) }}" class="nav-button">Back to Main</a>
-            </nav>
-        </header>
-
-        <div class="content-grid">
-            <section class="add-item-section">
-                <div class="add-item-card">
-                    <h2>Add New Portfolio Item</h2>
-                    <form method="post" enctype="multipart/form-data" class="portfolio-form">
-                        <div class="form-group">
-                            <label for="title">Project Title</label>
-                            <input type="text" id="title" name="title" required>
-                        </div>
-                        
-                        <div class="form-group">
-                            <label for="description">Project Description</label>
-                            <textarea id="description" name="description" rows="4" required></textarea>
-                        </div>
-                        
-                        <div class="form-group">
-                            <label for="image" class="file-label">
-                                <span class="file-label-text">Choose Image</span>
-                                <input type="file" id="image" name="image" required class="file-input">
-                            </label>
-                            <div id="file-name" class="file-name">No file chosen</div>
-                        </div>
-
-                        <button type="submit" class="submit-button">Add to Portfolio</button>
-                    </form>
+            
+            <div class="user-profile">
+                <h2>{{ user['first_name'] }} {{ user['last_name'] }}</h2>
+                <div class="profile-actions">
+                    <a href="{{ url_for('manage_portfolio', user_id=user_id) }}" class="action-link">Manage Portfolio</a>
+                    <a href="{{ url_for('view_messages', user_id=user_id) }}" class="action-link">Messages</a>
+                    <a href="{{ url_for('main', user_id=user_id) }}" class="action-link">Back to Main</a>
                 </div>
-            </section>
-
-            <section class="portfolio-section">
-                <h2>Your Portfolio Items</h2>
-                <div class="portfolio-grid">
-                    {% for item in portfolio_items %}
-                        <div class="portfolio-card">
-                            {% if item.image_url %}
-                                <div class="image-container" onclick="openImagePopup('{{ item.image_url }}')">
-                                    <img src="{{ item.image_url }}" alt="{{ item.Title }}" class="portfolio-image">
-                                    <div class="image-overlay">
-                                        <span class="view-text">Click to view</span>
-                                    </div>
-                                </div>
-                            {% endif %}
-                            <div class="card-content">
-                                <h3>{{ item.Title }}</h3>
-                                <p>{{ item.Description }}</p>
-                                <form method="post" action="{{ url_for('delete_portfolio', user_id=user_id, portfolio_id=item.PortfolioID) }}" class="delete-form">
-                                    <button type="submit" class="delete-button">Delete Item</button>
-                                </form>
-                            </div>
-                        </div>
+            </div>
+            <nav class="sidebar-nav">
+                <h3>Find Users</h3>
+                <form method="post" action="{{ url_for('search_users') }}" class="search-form">
+                    <input type="text" name="search_query" placeholder="Search users...">
+                    <button type="submit" class="search-button">Search</button>
+                </form>
+                <h3>Your Network</h3>
+                <ul class="subscribed-users">
+                    {% for subscription in subscriptions %}
+                        <li>
+                            <a href="{{ url_for('view_user_posts', user_id=subscription['SubscribedToID']) }}" class="user-link">
+                                {{ subscription['first_name'] }} {{ subscription['last_name'] }}
+                            </a>
+                        </li>
                     {% endfor %}
-                </div>
-            </section>
+                </ul>
+            </nav>
+            <a href="{{ url_for('login') }}" class="logout-button">Logout</a>
+        </aside>
+        
+        <main class="main-content">
+            <div class="bio-section">
+                <h2>Update Bio</h2>
+                <form method="post" action="{{ url_for('update_bio', user_id=user_id) }}" class="bio-form">
+                    <textarea name="bio" rows="4" placeholder="Write something about yourself...">{{ user.get('bio', '') }}</textarea>
+                    <button type="submit" class="bio-submit-button">Update Bio</button>
+                </form>
+            </div>
+
+            <div class="content-grid">
+                <section class="add-item-section">
+                    <div class="add-item-card">
+                        <h2>Add New Portfolio Item</h2>
+                        <form method="post" enctype="multipart/form-data" class="portfolio-form">
+                            <div class="form-group">
+                                <label for="title">Project Title</label>
+                                <input type="text" id="title" name="title" required>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="description">Project Description</label>
+                                <textarea id="description" name="description" rows="4" required></textarea>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="image" class="file-label">
+                                    <span class="file-label-text">Choose Image</span>
+                                    <input type="file" id="image" name="image" required class="file-input">
+                                </label>
+                                <div id="file-name" class="file-name">No file chosen</div>
+                            </div>
+                            <button type="submit" class="submit-button">Add to Portfolio</button>
+                        </form>
+                    </div>
+                </section>
+
+                <section class="portfolio-section">
+                    <h2>Your Portfolio Items</h2>
+                    <div class="portfolio-grid">
+                        {% for item in portfolio_items %}
+                            <div class="portfolio-card">
+                                {% if item.image_url %}
+                                    <div class="image-container" onclick="openImagePopup('{{ item.image_url }}')">
+                                        <img src="{{ item.image_url }}" alt="{{ item.Title }}" class="portfolio-image">
+                                        <div class="image-overlay">
+                                            <span class="view-text">Click to view</span>
+                                        </div>
+                                    </div>
+                                {% endif %}
+                                <div class="card-content">
+                                    <h3>{{ item.Title }}</h3>
+                                    <p>{{ item.Description }}</p>
+                                    <form method="post" action="{{ url_for('delete_portfolio', user_id=user_id, portfolio_id=item.PortfolioID) }}" class="delete-form">
+                                        <button type="submit" class="delete-button">Delete Item</button>
+                                    </form>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                </section>
+            </div>
+        </main>
+    </div>
+
+    <div class="image-popup-overlay" style="display: none;">
+        <div class="image-popup-content">
+            <img src="" alt="Portfolio Image">
+            <button class="close-popup" onclick="closeImagePopup()">&times;</button>
         </div>
     </div>
 
     <script>
-        // File input handling stuff. Took awhile to get to work properly
         document.getElementById('image').addEventListener('change', function(e) {
             const fileName = e.target.files[0]?.name || 'No file chosen';
             document.getElementById('file-name').textContent = fileName;
         });
 
-        // Image popup for preview
         function openImagePopup(imageUrl) {
-            const popup = document.createElement('div');
-            popup.className = 'image-popup-overlay';
-            popup.innerHTML = `
-                <div class="image-popup-content">
-                    <img src="${imageUrl}" alt="Portfolio Image">
-                    <button class="close-popup" onclick="this.parentElement.parentElement.remove()">×</button>
-                </div>
-            `;
-            document.body.appendChild(popup);
+            const popup = document.querySelector('.image-popup-overlay');
+            const popupImg = popup.querySelector('img');
+            popupImg.src = imageUrl;
+            popup.style.display = 'flex';
         }
+
+        function closeImagePopup() {
+            document.querySelector('.image-popup-overlay').style.display = 'none';
+        }
+
+        document.querySelector('.image-popup-overlay').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeImagePopup();
+            }
+        });
     </script>
 </body>
 </html>

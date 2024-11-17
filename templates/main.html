@@ -16,10 +16,13 @@
             
             <div class="user-profile">
                 <h2>{{ user['first_name'] }} {{ user['last_name'] }}</h2>
+                <div class="user-bio">
+                    <p>{{ user.get('bio', 'No bio available') }}</p>
+                </div>
                 <div class="profile-actions">
                     <a href="{{ url_for('manage_portfolio', user_id=user['UserID']) }}" class="action-link">Manage Portfolio</a>
-                    <a href="{{ url_for('view_messages', user_id=user['UserID']) }}" class="action-link">Messages</a>
-                    <a href="{{ url_for('color_palette') }}" class="action-link">Color Palette</a>
+                    <a href="{{ url_for('view_messages', user_id=user.get('UserID')) }}" class="action-link">Messages</a>
+                    <a href="{{ url_for('color_palette', user_id=user['UserID']) }}" class="action-link">Color Palette Generator</a>
                 </div>
             </div>
 

@@ -3,47 +3,97 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='main.css') }}">
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
-    <title>User Posts - DesignerHub</title>
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='user_posts.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
+    <title>{{ user['first_name'] }}'s Profile - DesignerHub</title>
 </head>
 <body>
     <div class="container">
+        <!-- sidebar -->
+        <div class="sidebar">
+            <div class="sidebar-header">
+                <img src="{{ url_for('static', filename='images/dhlogo.png') }}" alt="DesignerHub Logo" class="sidebar-logo">
+            </div>
+            <div class="user-profile">
+                <h2>Your Profile</h2>
+                <div class="profile-actions">
+                    <a href="{{ url_for('main', user_id=session['user_id']) }}" class="action-link">Back to Main</a>
+                    <a href="{{ url_for('manage_portfolio', user_id=session['user_id']) }}" class="action-link">Manage Portfolio</a>
+                    <a href="{{ url_for('view_messages', user_id=session['user_id']) }}" class="action-link">Messages</a>
+                </div>
+            </div>
+            <a href="{{ url_for('login') }}" class="logout-button">Logout</a>
+        </div>
+
         <div class="main-content">
-            <header>
-                <h1>{{ user['first_name'] }} {{ user['last_name'] }}'s Posts</h1>
-                <nav>
-                    <a href="{{ url_for('main', user_id=session['user_id']) }}" class="nav-button">Back to Main</a>
-                </nav>
-            </header>
-
-            <!-- Message form -->
-            <section class="send-message">
-                <h2>Send Message to {{ user['first_name'] }}</h2>
-                <form method="post" action="{{ url_for('send_message', receiver_id=user['UserID']) }}">
-                    <textarea name="message_content" rows="4" placeholder="Write your message..." required></textarea>
-                    <input type="submit" value="Send Message" class="button">
-                </form>
-            </section>
-
-            <section class="posts">
-                <h2>Posts</h2>
-                {% if posts %}
-                    <div class="posts-container">
-                        {% for post in posts %}
-                            <div class="post">
-                                <strong>{{ post['timestamp'] }}</strong>
-                                <p>{{ post['content'] }}</p>
-                                {% if post['image_url'] %}
-                                    <img src="{{ post['image_url'] }}" alt="Post Image">
-                                {% endif %}
-                            </div>
-                        {% endfor %}
+            <div class="profile-header">
+                <div class="profile-info">
+                    <div class="profile-avatar">
+                        {{ user['first_name'][0] }}{{ user['last_name'][0] }}
                     </div>
-                {% else %}
-                    <p>No posts yet.</p>
-                {% endif %}
-            </section>
+                    <div class="profile-details">
+                        <h1>{{ user['first_name'] }} {{ user['last_name'] }}</h1>
+                        <p class="profile-email">{{ user['email'] }}</p>
+                        <div class="user-bio">
+                            <p>{{ user.get('bio', 'No bio available') }}</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="content-grid">
+                <div class="left-column">
+                    <div class="message-card">
+                        <h2>Send Message</h2>
+                        <form method="post" action="{{ url_for('send_message', receiver_id=user['UserID']) }}" class="message-form">
+                            <textarea name="message_content" rows="4" placeholder="Write your message..." required></textarea>
+                            <button type="submit" class="send-button">Send Message</button>
+                        </form>
+                    </div>
+
+                    <div class="portfolio-section">
+                        <h2>Portfolio</h2>
+                        {% if portfolio_items %}
+                            <div class="portfolio-grid">
+                                {% for item in portfolio_items %}
+                                    <div class="portfolio-card">
+                                        <div class="portfolio-image" style="background-image: url('{{ item.image_url }}')"></div>
+                                        <div class="portfolio-info">
+                                            <h3>{{ item.Title }}</h3>
+                                            <p>{{ item.Description }}</p>
+                                        </div>
+                                    </div>
+                                {% endfor %}
+                            </div>
+                        {% else %}
+                            <p class="empty-state">No portfolio items yet.</p>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <div class="right-column">
+                    <h2>Posts</h2>
+                    {% if posts %}
+                        <div class="posts-container">
+                            {% for post in posts %}
+                                <div class="post-card">
+                                    <div class="post-header">
+                                        <span class="post-date">{{ post['timestamp']|format_datetime }}</span>
+                                    </div>
+                                    <div class="post-content">
+                                        <p>{{ post['content'] }}</p>
+                                        {% if post['image_url'] %}
+                                            <img src="{{ post['image_url'] }}" alt="Post Image" class="post-image">
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <div class="empty-state">No posts yet.</div>
+                    {% endif %}
+                </div>
+            </div>
         </div>
     </div>
 </body>

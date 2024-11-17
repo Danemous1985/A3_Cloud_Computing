@@ -12,7 +12,7 @@ body {
     min-height: 100vh;
 }
 
-/* sidebar style stuff */
+/* Sidebar style */
 .sidebar {
     width: 280px;
     background-color: #2c2c2c;
@@ -47,6 +47,20 @@ body {
     margin-bottom: 15px;
 }
 
+.user-bio {
+    margin: 15px 0;
+    padding: 15px;
+    background-color: #3c3c3c;
+    border-radius: 5px;
+    line-height: 1.6;
+}
+
+.user-bio p {
+    margin: 0;
+    color: #f8f8f8;
+    font-size: 0.95em;
+}
+
 .profile-actions {
     display: flex;
     flex-direction: column;
@@ -64,10 +78,30 @@ body {
     color: #ff5722;
 }
 
+.logout-button {
+    margin-top: auto;
+    padding: 15px 20px;
+    background-color: #d32f2f;
+    color: #f8f8f8;
+    text-align: center;
+    text-decoration: none;
+    transition: background-color 0.3s;
+}
+
+.logout-button:hover {
+    background-color: #b71c1c;
+}
+
 .sidebar-nav {
     padding: 20px;
     flex-grow: 1;
     overflow-y: auto;
+}
+
+.sidebar-nav h3 {
+    color: #ff5722;
+    margin: 20px 0 10px;
+    font-size: 1.1em;
 }
 
 .search-form {
@@ -75,29 +109,30 @@ body {
 }
 
 .search-form input {
-    width: calc(100% - 2px);
+    width: 100%;
     padding: 10px;
     border: 1px solid #444;
     border-radius: 5px;
     background-color: #3c3c3c;
     color: #f8f8f8;
     margin-bottom: 10px;
-    box-sizing: border-box;
 }
 
 .search-button {
     width: 100%;
     padding: 8px;
     background-color: #e53935;
-    color: #f8f8f8;
+    color: #ffffff;
     border: none;
     border-radius: 5px;
     cursor: pointer;
     transition: background-color 0.3s;
 }
 
-.search-button:hover {
-    background-color: #ff7043;
+.subscribed-users {
+    list-style: none;
+    padding: 0;
+    margin: 0;
 }
 
 .user-link {
@@ -113,20 +148,7 @@ body {
     background-color: #3c3c3c;
 }
 
-.logout-button {
-    padding: 15px 20px;
-    background-color: #d32f2f;
-    color: #f8f8f8;
-    text-align: center;
-    text-decoration: none;
-    transition: background-color 0.3s;
-}
-
-.logout-button:hover {
-    background-color: #b71c1c;
-}
-
-/* main content styl */
+/* Main content */
 .main-content {
     margin-left: 280px;
     flex-grow: 1;
@@ -135,10 +157,15 @@ body {
 
 .content-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    grid-template-columns: 350px 1fr;
     gap: 30px;
-    max-width: 1400px;
-    margin: 0 auto;
+}
+
+/* Portfolio section */
+.portfolio-section {
+    background-color: #2c2c2c;
+    padding: 20px;
+    border-radius: 10px;
 }
 
 .section-header {
@@ -150,29 +177,32 @@ body {
 
 .section-header h2 {
     color: #ff5722;
-    font-size: 1.5em;
     margin: 0;
 }
 
 .section-link {
-    color: #ff5722;
+    color: #f8f8f8;
     text-decoration: none;
     font-size: 0.9em;
+    transition: color 0.3s;
 }
 
-/* portfolio stylng */
+.section-link:hover {
+    color: #ff5722;
+}
+
 .portfolio-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
     gap: 20px;
 }
 
 .portfolio-card {
-    background-color: #2c2c2c;
-    border-radius: 10px;
+    background-color: #3c3c3c;
+    border-radius: 8px;
     overflow: hidden;
-    transition: transform 0.3s;
     cursor: pointer;
+    transition: transform 0.3s;
 }
 
 .portfolio-card:hover {
@@ -180,74 +210,63 @@ body {
 }
 
 .portfolio-image {
-    height: 300px;
+    width: 100%;
+    height: 200px;
+    background-position: center;
     background-size: contain;
     background-repeat: no-repeat;
-    background-position: center;
     background-color: #1e1e1e;
-    transition: transform 0.3s;
 }
 
 .portfolio-info {
     padding: 15px;
 }
 
-/* image popup style */
-.image-popup-overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background-color: rgba(0, 0, 0, 0.9);
+.portfolio-info h3 {
+    color: #ff5722;
+    margin: 0 0 10px 0;
+}
+
+.portfolio-info p {
+    margin: 0;
+    color: #f8f8f8;
+    font-size: 0.9em;
+    line-height: 1.5;
+}
+
+/* Feed section */
+.feed-section {
     display: flex;
-    justify-content: center;
-    align-items: center;
-    z-index: 1000;
-    padding: 20px;
+    flex-direction: column;
+    gap: 20px;
 }
 
-.image-popup-content {
-    position: relative;
-    max-width: 90vw;
-    max-height: 90vh;
-}
-
-.image-popup-content img {
-    max-width: 100%;
-    max-height: 90vh;
-    object-fit: contain;
-}
-
-.close-popup {
-    position: absolute;
-    top: -40px;
-    right: -40px;
-    background: none;
-    border: none;
-    color: white;
-    font-size: 30px;
-    cursor: pointer;
-}
-
-/* post style */
 .new-post-card {
     background-color: #2c2c2c;
-    border-radius: 10px;
     padding: 20px;
-    margin-bottom: 30px;
+    border-radius: 10px;
+}
+
+.new-post-card h3 {
+    color: #ff5722;
+    margin: 0 0 15px 0;
+}
+
+.post-form {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
 }
 
 .post-form textarea {
-    width: calc(100% - 2px);
-    background-color: #3c3c3c;
+    width: 100%;
+    padding: 12px;
     border: 1px solid #444;
     border-radius: 5px;
-    padding: 15px;
+    background-color: #3c3c3c;
     color: #f8f8f8;
-    margin-bottom: 15px;
-    resize: none;
-    box-sizing: border-box;
+    font-family: 'Poppins', sans-serif;
+    resize: vertical;
 }
 
 .post-actions {
@@ -276,10 +295,12 @@ body {
 .post-button {
     padding: 8px 20px;
     background-color: #e53935;
-    color: #f8f8f8;
+    color: #ffffff;
     border: none;
     border-radius: 5px;
     cursor: pointer;
+    font-family: 'Poppins', sans-serif;
+    font-weight: 600;
     transition: background-color 0.3s;
 }
 
@@ -287,11 +308,16 @@ body {
     background-color: #ff7043;
 }
 
+.posts-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
 .post-card {
     background-color: #2c2c2c;
     border-radius: 10px;
     padding: 20px;
-    margin-bottom: 20px;
 }
 
 .post-header {
@@ -307,32 +333,79 @@ body {
     line-height: 1.6;
 }
 
+.post-content p {
+    margin: 0 0 15px 0;
+}
+
 .post-image {
     width: 100%;
-    height: auto;
+    max-height: 400px;
     object-fit: contain;
     border-radius: 5px;
-    margin-top: 15px;
     cursor: pointer;
-    max-height: none;
-    background-color: #1e1e1e;
 }
 
 .empty-state {
     text-align: center;
     padding: 40px;
-    background-color: #2c2c2c;
-    border-radius: 10px;
-    color: #888;
+    background-color: #3c3c3c;
+    border-radius: 8px;
 }
 
-/* responsive style stuff. experimenting here some */
-@media (max-width: 1024px) {
-    .sidebar {
-        width: 240px;
-    }
-    .main-content {
-        margin-left: 240px;
+.action-button {
+    display: inline-block;
+    padding: 10px 20px;
+    background-color: #e53935;
+    color: #ffffff;
+    text-decoration: none;
+    border-radius: 5px;
+    margin-top: 15px;
+    transition: background-color 0.3s;
+}
+
+.action-button:hover {
+    background-color: #ff7043;
+}
+
+.image-popup-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.9);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+.image-popup-content {
+    position: relative;
+    max-width: 90vw;
+    max-height: 90vh;
+}
+
+.image-popup-content img {
+    max-width: 100%;
+    max-height: 90vh;
+    object-fit: contain;
+}
+
+.close-popup {
+    position: absolute;
+    top: -40px;
+    right: -40px;
+    background: none;
+    border: none;
+    color: white;
+    font-size: 30px;
+    cursor: pointer;
+}
+
+@media (max-width: 1200px) {
+    .content-grid {
+        grid-template-columns: 1fr;
     }
 }
 
@@ -340,16 +413,80 @@ body {
     .container {
         flex-direction: column;
     }
+    
     .sidebar {
         width: 100%;
         height: auto;
         position: relative;
     }
+    
     .main-content {
         margin-left: 0;
         padding: 20px;
     }
+    
+    .content-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .portfolio-grid {
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    }
+    
+    .post-actions {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    
+    .file-label,
+    .post-button {
+        text-align: center;
+    }
+    
+    .image-popup-content {
+        width: 90vw;
+    }
+    
+    .close-popup {
+        top: -30px;
+        right: 0;
+    }
+}
+
+@media (max-width: 480px) {
     .portfolio-grid {
         grid-template-columns: 1fr;
     }
+    
+    .portfolio-image {
+        height: 150px;
+    }
+    
+    .section-header {
+        flex-direction: column;
+        gap: 10px;
+        text-align: center;
+    }
+    
+    .post-card {
+        padding: 15px;
+    }
+    
+    .user-profile h2 {
+        font-size: 1.1em;
+    }
+    
+    .action-link {
+        font-size: 0.85em;
+    }
+}
+
+/* This part for the bio content area */
+.bio-content {
+    margin-top: 10px;
+    font-style: italic;
+    color: #aaa;
+    font-size: 0.9em;
+    line-height: 1.4;
+    padding: 0 10px;
 }

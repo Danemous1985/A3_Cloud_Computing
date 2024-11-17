@@ -81,7 +81,7 @@
                             {% endfor %}
                         {% else %}
                             <div class="empty-state">
-                                <p>Are you a designer? Select a Base colour above and have 4 colour schemes generated for your web page, Ui etc. Click to highlight the Hex code and right click to copy each colour you are happy with</p>
+                                <p>Are you a designer? Select a base colour above to generate 4 color schemes for your UI, webpage, etc. Click to select the Hex code and right-click to copy each color you like.</p>
                             </div>
                         {% endif %}
                     </div>
@@ -92,7 +92,7 @@
     
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            // Select text when the input is clicked s user can copy hex code
+            // Select text when the input is clicked so user can copy hex code
             const hexInputs = document.querySelectorAll('.hex-input');
             hexInputs.forEach(input => {
                 input.addEventListener('click', function() {
